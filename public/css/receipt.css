@@ -1,0 +1,259 @@
+﻿/* =========================================================
+   Thermal Receipt 58mm Stylesheet
+   Screen Preview & High-Precision 58mm Print Media
+   ========================================================= */
+
+/* Modal Backdrop for Receipt Preview */
+.receipt-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+}
+
+.receipt-preview-container {
+  background-color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 380px;
+  overflow: hidden;
+  animation: modalFadeIn 0.15s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.receipt-modal-header {
+  padding: 14px 18px;
+  background-color: var(--bg-muted);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.receipt-modal-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.receipt-modal-actions {
+  padding: 14px 18px;
+  background-color: var(--bg-muted);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 10px;
+}
+
+.receipt-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: #f1f5f9;
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================================================
+   Thermal 58mm Paper Component (Both on-screen & print)
+   ========================================================= */
+.receipt-paper {
+  width: 58mm;
+  min-width: 58mm;
+  max-width: 58mm;
+  background-color: #ffffff;
+  padding: 4mm 3mm;
+  box-sizing: border-box;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #000000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+}
+
+/* 1. Header Toko */
+.rcp-store-name {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+
+.rcp-store-address,
+.rcp-store-phone {
+  font-size: 10px;
+  text-align: center;
+  margin-bottom: 1px;
+}
+
+/* Garis Pemisah Karakter Monospace */
+.rcp-divider-double {
+  text-align: center;
+  margin: 4px 0;
+  font-size: 11px;
+  letter-spacing: -0.5px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.rcp-divider-single {
+  text-align: center;
+  margin: 3px 0;
+  font-size: 11px;
+  letter-spacing: -0.5px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Meta Data Info (No Struk, Tanggal, Kasir) */
+.rcp-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+/* Daftar Item Belanja */
+.rcp-items-table {
+  width: 100%;
+  margin: 3px 0;
+}
+
+.rcp-item-row {
+  margin-bottom: 4px;
+}
+
+.rcp-item-name {
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.rcp-item-subline {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding-left: 6px;
+}
+
+.rcp-item-qtyprice {
+  color: #000;
+}
+
+.rcp-item-subtotal {
+  font-weight: bold;
+  text-align: right;
+}
+
+/* Ringkasan Subtotal, Diskon, Pajak, Total */
+.rcp-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  font-size: 11px;
+}
+
+.rcp-grand-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: bold;
+  margin: 4px 0;
+  padding: 2px 0;
+}
+
+/* Pembayaran & Kembalian */
+.rcp-payment-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+/* Footer Catatan */
+.rcp-footer {
+  text-align: center;
+  font-size: 10px;
+  margin-top: 6px;
+  line-height: 1.3;
+}
+
+.rcp-footer .thanks {
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+/* Spasi Ruang Kosong Cutter Printer (3-4 baris) */
+.rcp-cutter-feed {
+  height: 24px;
+  line-height: 24px;
+  content: "";
+}
+
+/* =========================================================
+   PRINT MEDIA QUERY - STRICT 58mm AUTO MARGIN 0
+   ========================================================= */
+@page {
+  size: 58mm auto;
+  margin: 0;
+}
+
+@media print {
+  html, body {
+    width: 58mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Hide everything on the page except the printable receipt container */
+  body * {
+    visibility: hidden;
+  }
+
+  #thermal-print-area,
+  #thermal-print-area * {
+    visibility: visible;
+  }
+
+  #thermal-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    padding: 2mm 3mm !important;
+    margin: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .receipt-paper {
+    box-shadow: none !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent browser from adding header and footer date/url */
+  .receipt-modal-backdrop,
+  .receipt-modal-header,
+  .receipt-modal-actions {
+    display: none !important;
+  }
+}

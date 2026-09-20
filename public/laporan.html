@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Laporan & Dashboard - Minimarket Sejahtera</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/receipt.css">
+  <style>
+    .report-tabs-nav {
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    .report-tab-btn {
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .report-tab-btn:hover { color: var(--text-main); }
+    .report-tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    .stat-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+    .stat-card .sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">MS</div>
+        <div class="brand-text">
+          <h1>Minimarket Sejahtera</h1>
+          <span>Dashboard & Laporan Penjualan</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Kasir</a></li>
+          <li>
+            <a href="inventori.html" class="nav-link">
+              Inventori
+              <span class="badge-alert" id="header-low-stock-badge" style="display: none;">0</span>
+            </a>
+          </li>
+          <li><a href="stok.html" class="nav-link">Kelola Stok</a></li>
+          <li><a href="laporan.html" class="nav-link active">Laporan</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-sm btn-secondary" onclick="Auth.openStoreSettingsModal()" title="Pengaturan Toko & Struk">
+          Pengaturan Struk
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-container">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Laporan Keuangan & Inventori</h2>
+          <p>Pantau omzet harian, keuntungan kotor, produk terlaris, dan ekspor data ke Excel / CSV.</p>
+        </div>
+        <div>
+          <button class="btn btn-secondary" onclick="Reports.exportCsv()">
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="report-tabs-nav">
+        <button class="report-tab-btn active" data-tab="dashboard" onclick="Reports.switchTab('dashboard')">
+          Dashboard
+        </button>
+        <button class="report-tab-btn" data-tab="sales" onclick="Reports.switchTab('sales')">
+          Penjualan
+        </button>
+        <button class="report-tab-btn" data-tab="profit" onclick="Reports.switchTab('profit')">
+          Laba Kotor
+        </button>
+        <button class="report-tab-btn" data-tab="inventory" onclick="Reports.switchTab('inventory')">
+          Valuasi Stok
+        </button>
+      </div>
+
+      <!-- Date Filter Bar (Shown on Sales & Profit tabs) -->
+      <div class="card" id="report-filter-bar" style="padding: 14px 18px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600;">Dari:</label>
+            <input type="date" id="report-start-date" class="form-control" style="width: auto;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="font-size: 13px; font-weight: 600;">Sampai:</label>
+            <input type="date" id="report-end-date" class="form-control" style="width: auto;">
+          </div>
+          <div style="width: 160px;">
+            <select id="report-payment-method" class="form-control">
+              <option value="ALL">Semua Pembayaran</option>
+              <option value="cash">Tunai</option>
+              <option value="qris">QRIS</option>
+              <option value="debit">Debit/Transfer</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="report-filter-apply-btn">Terapkan</button>
+
+          <!-- Quick presets -->
+          <div style="margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-sm btn-secondary" onclick="Reports.setQuickDate('today')">Hari Ini</button>
+            <button class="btn btn-sm btn-secondary" onclick="Reports.setQuickDate('yesterday')">Kemarin</button>
+            <button class="btn btn-sm btn-secondary" onclick="Reports.setQuickDate('7days')">7 Hari</button>
+            <button class="btn btn-sm btn-secondary" onclick="Reports.setQuickDate('month')">Bulan Ini</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="view-dashboard">
+        <!-- Stat Cards -->
+        <div class="stat-card-grid">
+          <div class="stat-card">
+            <div class="title">Penjualan Hari Ini</div>
+            <div class="value" id="dash-today-sales" style="color: var(--accent-primary);">Rp 0</div>
+            <div class="sub">Total omzet transaksi selesai</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Jumlah Transaksi</div>
+            <div class="value" id="dash-today-tx">0 trx</div>
+            <div class="sub">Hari ini</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Rata-rata Transaksi</div>
+            <div class="value" id="dash-today-avg">Rp 0</div>
+            <div class="sub">Basket size belanja</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Laba Kotor Hari Ini</div>
+            <div class="value" id="dash-today-profit" style="color: var(--success);">Rp 0</div>
+            <div class="sub">Omzet dikurangi HPP produk</div>
+          </div>
+        </div>
+
+        <!-- Chart & Top Products Row -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <div class="card">
+            <h3 style="font-size: 15px; margin-bottom: 14px;">Grafik Tren Penjualan (7 Hari Terakhir)</h3>
+            <div id="dash-sales-chart" style="min-height: 220px; display: flex; align-items: center; justify-content: center;">
+              <!-- Rendered by SVG -->
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: 15px; margin-bottom: 14px;">Top 5 Produk Terlaris (30 Hari)</h3>
+            <div id="dash-top-products">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: LAPORAN PENJUALAN -->
+      <div id="view-sales" style="display: none;">
+        <div class="stat-card-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="stat-card">
+            <div class="title">Total Omzet Periode</div>
+            <div class="value" id="sales-summary-total" style="color: var(--accent-primary);">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Transaksi Selesai</div>
+            <div class="value" id="sales-summary-count">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Total Diskon Diberikan</div>
+            <div class="value" id="sales-summary-discount">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Estimasi Laba Kotor</div>
+            <div class="value" id="sales-summary-profit" style="color: var(--success);">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No Invoice</th>
+                <th>Waktu</th>
+                <th>Kasir</th>
+                <th>Metode Bayar</th>
+                <th>Item</th>
+                <th>Grand Total</th>
+                <th>Status</th>
+                <th style="text-align: right;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="sales-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: LAPORAN LABA KOTOR -->
+      <div id="view-profit" style="display: none;">
+        <div class="stat-card-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="stat-card">
+            <div class="title">Total Penjualan</div>
+            <div class="value" id="profit-summary-revenue">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Total HPP (Modal)</div>
+            <div class="value" id="profit-summary-cost">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Laba Kotor Bersih</div>
+            <div class="value" id="profit-summary-gross" style="color: var(--success);">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Gross Profit Margin</div>
+            <div class="value" id="profit-summary-margin" style="color: var(--accent-primary);">0%</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Qty Terjual</th>
+                <th>Total Modal (HPP)</th>
+                <th>Total Omzet</th>
+                <th>Laba Kotor</th>
+                <th>Margin (%)</th>
+              </tr>
+            </thead>
+            <tbody id="profit-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: LAPORAN NILAI INVENTORI -->
+      <div id="view-inventory" style="display: none;">
+        <div class="stat-card-grid" style="grid-template-columns: repeat(5, 1fr);">
+          <div class="stat-card">
+            <div class="title">Total Ragam Produk</div>
+            <div class="value" id="inv-summary-count">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Total Unit Stok</div>
+            <div class="value" id="inv-summary-qty">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Nilai Aset Modal (HPP)</div>
+            <div class="value" id="inv-summary-cost">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Potensi Omzet Jual</div>
+            <div class="value" id="inv-summary-retail" style="color: var(--accent-primary);">Rp 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="title">Potensi Keuntungan</div>
+            <div class="value" id="inv-summary-potential" style="color: var(--success);">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Barcode</th>
+                <th>Nama Produk</th>
+                <th>Harga Modal (HPP)</th>
+                <th>Harga Jual</th>
+                <th>Sisa Stok</th>
+                <th>Nilai Modal Stok</th>
+                <th>Potensi Nilai Jual</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Generic Modal Container -->
+  <div class="modal-backdrop" id="generic-modal" style="display: none;"></div>
+
+  <!-- Hidden Thermal 58mm Print Area -->
+  <div id="thermal-print-area"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/receipt.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

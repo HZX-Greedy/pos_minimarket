@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Stok Masuk & Opname - Minimarket Sejahtera</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <style>
+    .stock-tabs-nav {
+      display: flex;
+      gap: 10px;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+    .stock-tab-btn {
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .stock-tab-btn:hover {
+      color: var(--text-main);
+    }
+    .stock-tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">MS</div>
+        <div class="brand-text">
+          <h1>Minimarket Sejahtera</h1>
+          <span>Mutasi & Penyesuaian Stok</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Kasir</a></li>
+          <li>
+            <a href="inventori.html" class="nav-link">
+              Inventori
+              <span class="badge-alert" id="header-low-stock-badge" style="display: none;">0</span>
+            </a>
+          </li>
+          <li><a href="stok.html" class="nav-link active">Kelola Stok</a></li>
+          <li><a href="laporan.html" class="nav-link">Laporan</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-sm btn-secondary" onclick="Auth.openStoreSettingsModal()" title="Pengaturan Toko & Struk">
+          Pengaturan Struk
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-container">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Penerimaan Barang, Opname & Kartu Stok</h2>
+          <p>Catat stok masuk dari supplier, lakukan penyesuaian stok opname fisik, dan pantau mutasi kartu stok.</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="stock-tabs-nav">
+        <button class="stock-tab-btn active" data-tab="in" onclick="Stock.switchTab('in')">
+          Stok Masuk
+        </button>
+        <button class="stock-tab-btn" data-tab="adj" onclick="Stock.switchTab('adj')">
+          Stok Opname
+        </button>
+        <button class="stock-tab-btn" data-tab="history" onclick="Stock.switchTab('history')">
+          Riwayat Mutasi
+        </button>
+      </div>
+
+      <!-- TAB 1: STOK MASUK -->
+      <div id="view-stock-in" class="card" style="max-width: 720px; margin: 0 auto 30px auto;">
+        <h3 style="margin-bottom: 14px; font-size: 16px;">Form Penerimaan Barang dari Supplier</h3>
+        <form id="form-stock-in" onsubmit="Stock.handleStockInSubmit(event)">
+          <div class="form-group">
+            <label>Produk *</label>
+            <select id="stock-in-product" class="form-control" required>
+              <option value="">Pilih Produk</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label>Supplier (Opsional)</label>
+              <select id="stock-in-supplier" class="form-control">
+                <option value="">Pilih Supplier</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Jumlah Masuk (Qty) *</label>
+              <input type="number" id="stock-in-qty" class="form-control" min="1" required placeholder="0">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label>Harga Beli Baru Satuan (Opsional)</label>
+              <input type="number" id="stock-in-cost" class="form-control" min="0" placeholder="Biarkan kosong jika tidak berubah">
+            </div>
+            <div class="form-group">
+              <label>No. Faktur / Referensi</label>
+              <input type="text" id="stock-in-ref" class="form-control" placeholder="Contoh: INV-PO-2026/09">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Catatan Tambahan</label>
+            <input type="text" id="stock-in-notes" class="form-control" placeholder="Keterangan pengiriman atau batch penerimaan">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+            Simpan Stok Masuk
+          </button>
+        </form>
+      </div>
+
+      <!-- TAB 2: STOK OPNAME / PENYESUAIAN -->
+      <div id="view-stock-adj" class="card" style="max-width: 720px; margin: 0 auto 30px auto; display: none;">
+        <h3 style="margin-bottom: 14px; font-size: 16px;">Form Penyesuaian Stok Opname (Fisik vs Sistem)</h3>
+        <form id="form-stock-adj" onsubmit="Stock.handleStockAdjSubmit(event)">
+          <div class="form-group">
+            <label>Pilih Produk untuk Opname *</label>
+            <select id="stock-adj-product" class="form-control" required>
+              <option value="">Pilih Produk</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Stok Fisik Sebenarnya (Hasil Hitung di Rak/Gudang) *</label>
+            <input type="number" id="stock-adj-physical" class="form-control" min="0" required placeholder="Masukkan jumlah stok fisik">
+            <div id="stock-adj-diff-info" style="margin-top: 6px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Alasan Penyesuaian *</label>
+            <select id="stock-adj-reason" class="form-control" required>
+              <option value="Selisih Hitung / Koreksi Rutin">Selisih Hitung / Koreksi Rutin</option>
+              <option value="Barang Rusak / Pecah">Barang Rusak / Pecah</option>
+              <option value="Barang Expired / Kadaluarsa">Barang Expired / Kadaluarsa</option>
+              <option value="Barang Hilang / Selisih Tak Dikenal">Barang Hilang / Selisih Tak Dikenal</option>
+              <option value="Bonus Supplier / Sample">Bonus Supplier / Sample</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Catatan Detail</label>
+            <input type="text" id="stock-adj-notes" class="form-control" placeholder="Keterangan temuan opname">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+            Simpan Penyesuaian Stok Fisik
+          </button>
+        </form>
+      </div>
+
+      <!-- TAB 3: RIWAYAT MUTASI KARTU STOK -->
+      <div id="view-stock-history" style="display: none;">
+        <div class="card" style="padding: 14px 18px; margin-bottom: 18px;">
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px;">
+              <select id="movement-filter-product" class="form-control" onchange="Stock.loadMovements()">
+                <option value="">Semua Produk</option>
+              </select>
+            </div>
+            <div style="width: 180px;">
+              <select id="movement-filter-type" class="form-control" onchange="Stock.loadMovements()">
+                <option value="ALL">Semua Tipe Mutasi</option>
+                <option value="IN">Stok Masuk (IN)</option>
+                <option value="OUT">Penjualan (OUT)</option>
+                <option value="ADJUSTMENT">Penyesuaian (ADJUSTMENT)</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" onclick="Stock.loadMovements()">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Produk</th>
+                <th>Tipe</th>
+                <th>Perubahan Qty</th>
+                <th>Stok Sebelum</th>
+                <th>Stok Sesudah</th>
+                <th>Referensi / Keterangan</th>
+                <th>Operator</th>
+              </tr>
+            </thead>
+            <tbody id="movements-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/stock.js"></script>
+</body>
+</html>

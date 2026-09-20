@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Produk & Inventori - Minimarket Sejahtera</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header Navbar -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">MS</div>
+        <div class="brand-text">
+          <h1>Minimarket Sejahtera</h1>
+          <span>Manajemen Inventori & Katalog</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link">Kasir</a></li>
+          <li>
+            <a href="inventori.html" class="nav-link active">
+              Inventori
+              <span class="badge-alert" id="header-low-stock-badge" style="display: none;">0</span>
+            </a>
+          </li>
+          <li><a href="stok.html" class="nav-link">Kelola Stok</a></li>
+          <li><a href="laporan.html" class="nav-link">Laporan</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-sm btn-secondary" onclick="Auth.openStoreSettingsModal()" title="Pengaturan Toko & Struk">
+          Pengaturan Struk
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-container">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Katalog Produk & Inventori</h2>
+          <p>Kelola data produk, barcode SKU, harga jual/beli, batas minimum stok, dan supplier.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <input type="file" id="backup-file-input" accept=".json" style="display: none;" onchange="Products.handleRestoreFile(event)">
+          <button class="btn btn-secondary" onclick="Products.exportBackup()" title="Download cadangan file JSON">
+            Backup Data
+          </button>
+          <button class="btn btn-secondary" onclick="Products.triggerRestore()" title="Pulihkan data dari file JSON">
+            Restore Data
+          </button>
+          <button class="btn btn-secondary" onclick="Products.openSupplierModal()">
+            Kelola Supplier
+          </button>
+          <button class="btn btn-primary" onclick="Products.openAddModal()">
+            + Tambah Produk
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="card" style="padding: 14px 18px; margin-bottom: 18px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <input type="text" id="search-products" class="form-control" placeholder="Cari nama produk atau scan barcode...">
+          </div>
+          <div>
+            <button class="btn btn-secondary" id="filter-low-stock-btn">
+              Stok Menipis
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Foto</th>
+              <th>Barcode / SKU</th>
+              <th>Nama Produk</th>
+              <th>Harga Beli</th>
+              <th>Harga Jual</th>
+              <th>Stok Saat Ini</th>
+              <th style="text-align: right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls Container -->
+      <div id="products-pagination-container"></div>
+    </main>
+  </div>
+
+  <!-- Generic Modal Container -->
+  <div class="modal-backdrop" id="generic-modal" style="display: none;"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>
